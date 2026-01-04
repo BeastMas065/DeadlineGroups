@@ -1,4 +1,4 @@
-import { Task, TaskStatus, TaskUpdate, Subtask, GroupMember } from '@/types/task';
+import { Task, TaskStatus, TaskUpdate, Subtask, GroupMember, FocusSession } from '@/types/task';
 
 const STORAGE_KEY = 'deadline-groups-tasks';
 const USER_KEY = 'deadline-groups-user';
@@ -196,4 +196,36 @@ export const completeTask = (taskId: string): boolean => {
 export const getTask = (taskId: string): Task | null => {
   const tasks = getTasks();
   return tasks.find(t => t.id === taskId) || null;
+};
+
+export const addFocusSession = (taskId: string, duration: number): FocusSession | null => {
+  const tasks = getTasks();
+  const taskIndex = tasks.findIndex(t => t.id === taskId);
+  
+  if (taskIndex === -1) return null;
+  
+  const session: FocusSession = {
+    id: generateId(),
+    startTime: new Date(Date.now() - duration * 1000),
+    endTime: new Date(),
+    duration,
+    completed: true,
+  };
+  
+  tasks[taskIndex].focusSessions = tasks[taskIndex].focusSessions || [];
+  tasks[taskIndex].focusSessions.push(session);
+  saveTasks(tasks);
+  
+  return session;
+};
+
+export const updateManualProgress = (taskId: string, progress: number): boolean => {
+  const tasks = getTasks();
+  const taskIndex = tasks.findIndex(t => t.id === taskId);
+  
+  if (taskIndex === -1) return false;
+  
+  tasks[taskIndex].manualProgress = Math.max(0, Math.min(100, progress));
+  saveTasks(tasks);
+  return true;
 };

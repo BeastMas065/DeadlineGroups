@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { CountdownTimer } from '@/components/CountdownTimer';
+import { FocusTimer } from '@/components/FocusTimer';
+import { ProgressIndicator } from '@/components/ProgressIndicator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,7 +17,9 @@ import {
   toggleSubtask, 
   completeTask,
   getCurrentUser,
-  leaveTask
+  leaveTask,
+  addFocusSession,
+  updateManualProgress
 } from '@/lib/taskStore';
 import { Task } from '@/types/task';
 import { 
@@ -29,7 +33,8 @@ import {
   Plus,
   Send,
   Copy,
-  LogOut
+  LogOut,
+  Timer
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -126,6 +131,25 @@ const TaskDetail = () => {
     }
   };
 
+  const handleFocusSessionComplete = (duration: number) => {
+    addFocusSession(task.id, duration);
+    setRefreshKey(k => k + 1);
+    toast.success('Focus session completed! Great work.');
+  };
+
+  const handleProgressChange = (progress: number) => {
+    updateManualProgress(task.id, progress);
+    setRefreshKey(k => k + 1);
+  };
+
+  const totalFocusTime = task.focusSessions?.reduce((acc, s) => acc + s.duration, 0) || 0;
+  const formatTotalTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) return `${hours}h ${mins}m`;
+    return `${mins}m`;
+  };
+
   const completedSubtasks = task.subtasks?.filter(s => s.completed).length || 0;
   const totalSubtasks = task.subtasks?.length || 0;
   const progress = totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0;
@@ -206,6 +230,32 @@ const TaskDetail = () => {
                 </p>
               </CardContent>
             </Card>
+          )}
+          
+          {/* Focus Session (Solo only) */}
+          {task.type === 'solo' && !isLocked && (
+            <div className="mb-8">
+              <div className="flex items-center gap-2 mb-4">
+                <Timer className="w-5 h-5 text-primary" />
+                <h2 className="font-mono text-lg font-semibold">Focus Mode</h2>
+                {totalFocusTime > 0 && (
+                  <Badge variant="outline" className="font-mono text-xs ml-auto">
+                    Total: {formatTotalTime(totalFocusTime)}
+                  </Badge>
+                )}
+              </div>
+              <div className="grid md:grid-cols-2 gap-6">
+                <FocusTimer 
+                  onSessionComplete={handleFocusSessionComplete}
+                  disabled={isLocked}
+                />
+                <ProgressIndicator 
+                  value={task.manualProgress || 0}
+                  onChange={handleProgressChange}
+                  disabled={isLocked}
+                />
+              </div>
+            </div>
           )}
           
           <div className="grid md:grid-cols-2 gap-6">
