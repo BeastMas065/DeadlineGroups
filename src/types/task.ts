@@ -15,6 +15,14 @@ export interface Subtask {
   completed: boolean;
 }
 
+export interface FocusSession {
+  id: string;
+  startTime: Date;
+  endTime?: Date;
+  duration: number; // in seconds
+  completed: boolean;
+}
+
 export interface GroupMember {
   id: string;
   name: string;
@@ -35,4 +43,6 @@ export interface Task {
   members?: GroupMember[];
   updates?: TaskUpdate[];
   subtasks?: Subtask[];
+  focusSessions?: FocusSession[];
+  manualProgress?: number; // 0-100
 }
