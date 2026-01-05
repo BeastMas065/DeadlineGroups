@@ -56,6 +56,7 @@ export const getTaskStatus = (task: Task): TaskStatus => {
 export const createTask = (
   title: string,
   description: string,
+  commitment: string,
   type: 'solo' | 'group',
   deadline: Date
 ): Task => {
@@ -66,6 +67,7 @@ export const createTask = (
     id,
     title,
     description,
+    commitment,
     type,
     status: 'upcoming',
     deadline,

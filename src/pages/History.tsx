@@ -26,9 +26,9 @@ const History = () => {
       
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8 animate-fade-in">
-          <h1 className="font-mono text-3xl font-bold mb-2">History</h1>
+          <h1 className="font-mono text-3xl font-bold mb-2">Archive</h1>
           <p className="text-muted-foreground">
-            Past deadlines. Done or expired. No going back.
+            Closed contracts. Fulfilled or abandoned. Read-only.
           </p>
         </div>
         
@@ -45,7 +45,7 @@ const History = () => {
             </TabsTrigger>
             <TabsTrigger value="expired" className="gap-2 font-mono">
               <XCircle className="w-4 h-4" />
-              Expired
+              Ended
               {expiredTasks.length > 0 && (
                 <span className="ml-1 px-1.5 py-0.5 rounded bg-expired/20 text-expired-foreground text-xs">
                   {expiredTasks.length}
@@ -75,8 +75,8 @@ const History = () => {
           <TabsContent value="expired">
             {expiredTasks.length === 0 ? (
               <EmptyState 
-                title="No expired deadlines" 
-                description="All your deadlines are either active or completed. Keep up the good work!"
+                title="No ended deadlines" 
+                description="Time ran out on none of your contracts. Yet."
                 icon="clock"
               />
             ) : (

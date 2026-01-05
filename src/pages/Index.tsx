@@ -37,9 +37,11 @@ const Index = () => {
             Work Hard. Finish.{' '}
             <span className="text-gradient">Disappear.</span>
           </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-8">
-            Constraint-driven productivity. Set a deadline, do the work, and let it expire. 
-            No infinite tasks. No endless threads.
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-2">
+            Constraint-driven productivity. Set a deadline, commit to delivery, execute, and let it end.
+          </p>
+          <p className="text-muted-foreground/60 text-sm font-mono mb-8">
+            Nothing here lasts forever.
           </p>
           
           <CreateTaskDialog onTaskCreated={handleRefresh} />
@@ -50,7 +52,7 @@ const Index = () => {
           <TabsList className="mb-6">
             <TabsTrigger value="active" className="gap-2 font-mono">
               <Zap className="w-4 h-4" />
-              Active
+              Executing
               {inProgressTasks.length > 0 && (
                 <span className="ml-1 px-1.5 py-0.5 rounded bg-primary text-primary-foreground text-xs">
                   {inProgressTasks.length}
@@ -59,7 +61,7 @@ const Index = () => {
             </TabsTrigger>
             <TabsTrigger value="upcoming" className="gap-2 font-mono">
               <Clock className="w-4 h-4" />
-              Upcoming
+              Locked
               {upcomingTasks.length > 0 && (
                 <span className="ml-1 px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground text-xs">
                   {upcomingTasks.length}
@@ -71,8 +73,8 @@ const Index = () => {
           <TabsContent value="active">
             {inProgressTasks.length === 0 ? (
               <EmptyState 
-                title="No active deadlines" 
-                description="When a deadline is within 1 hour of expiry, it becomes active. Create a deadline to get started."
+                title="No active execution windows" 
+                description="When a deadline is within 1 hour of expiry, it enters execution mode. Create a deadline to begin."
                 icon="zap"
               />
             ) : (
@@ -89,8 +91,8 @@ const Index = () => {
           <TabsContent value="upcoming">
             {upcomingTasks.length === 0 ? (
               <EmptyState 
-                title="No upcoming deadlines" 
-                description="All your deadlines are either active or have expired. Create a new one to keep the momentum going."
+                title="No locked deadlines" 
+                description="Your contracts with time await. Create a deadline and make a commitment."
                 icon="clock"
               />
             ) : (

@@ -34,7 +34,9 @@ import {
   Send,
   Copy,
   LogOut,
-  Timer
+  Timer,
+  AlertTriangle,
+  Target
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -67,15 +69,16 @@ const TaskDetail = () => {
   const isActive = status === 'active';
   const isExpired = status === 'expired';
   const isCompleted = status === 'completed';
+  const isUpcoming = status === 'upcoming';
   const isLocked = isExpired || isCompleted;
   const isCreator = task.creatorId === currentUser.id;
   const isMember = task.members?.some(m => m.id === currentUser.id);
 
   const statusConfig = {
-    upcoming: { label: 'UPCOMING', icon: Clock, color: 'text-muted-foreground' },
-    active: { label: 'ACTIVE', icon: Clock, color: 'text-primary' },
+    upcoming: { label: 'LOCKED', icon: Clock, color: 'text-muted-foreground' },
+    active: { label: 'EXECUTION WINDOW', icon: AlertTriangle, color: 'text-primary' },
     completed: { label: 'COMPLETED', icon: CheckCircle2, color: 'text-success' },
-    expired: { label: 'EXPIRED', icon: XCircle, color: 'text-expired-foreground' },
+    expired: { label: 'ENDED', icon: XCircle, color: 'text-expired-foreground' },
   };
 
   const config = statusConfig[status];
@@ -121,7 +124,7 @@ const TaskDetail = () => {
   const handleComplete = () => {
     completeTask(task.id);
     setRefreshKey(k => k + 1);
-    toast.success('Deadline completed! Great work.');
+    toast.success('Deadline completed.');
   };
 
   const handleLeave = () => {
@@ -134,7 +137,7 @@ const TaskDetail = () => {
   const handleFocusSessionComplete = (duration: number) => {
     addFocusSession(task.id, duration);
     setRefreshKey(k => k + 1);
-    toast.success('Focus session completed! Great work.');
+    toast.success('Execution block completed.');
   };
 
   const handleProgressChange = (progress: number) => {
@@ -169,6 +172,39 @@ const TaskDetail = () => {
         </Button>
         
         <div className="animate-fade-in">
+          {/* Expired State Banner */}
+          {isExpired && (
+            <div className="mb-8 p-6 rounded-lg border border-expired/50 bg-expired/10">
+              <div className="text-center">
+                <XCircle className="w-12 h-12 text-expired-foreground mx-auto mb-3" />
+                <h2 className="font-mono text-xl font-bold text-expired-foreground mb-2">
+                  This deadline has ended.
+                </h2>
+                <p className="text-muted-foreground">
+                  No more work can be added.
+                </p>
+                <p className="text-sm text-muted-foreground mt-4 italic">
+                  Did you finish what you committed to?
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Completed State Banner */}
+          {isCompleted && (
+            <div className="mb-8 p-6 rounded-lg border border-success/50 bg-success/10">
+              <div className="text-center">
+                <CheckCircle2 className="w-12 h-12 text-success mx-auto mb-3" />
+                <h2 className="font-mono text-xl font-bold text-success mb-2">
+                  Deadline completed.
+                </h2>
+                <p className="text-muted-foreground">
+                  This contract is fulfilled.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
@@ -186,27 +222,73 @@ const TaskDetail = () => {
             </div>
             
             <h1 className="font-mono text-3xl md:text-4xl font-bold mb-2">{task.title}</h1>
-            <p className="text-muted-foreground text-lg">{task.description}</p>
+            
+            {/* Contract Copy */}
+            {!isLocked && (
+              <p className="text-xs text-muted-foreground font-mono tracking-wider mt-2 opacity-60">
+                This space exists only until the timer hits zero.
+              </p>
+            )}
+            
+            {task.description && (
+              <p className="text-muted-foreground mt-3">{task.description}</p>
+            )}
           </div>
+
+          {/* Commitment - The Contract */}
+          <Card className={cn(
+            'mb-8 border-2',
+            isLocked ? 'border-muted bg-card/50' : 'border-primary/30 bg-primary/5'
+          )}>
+            <CardContent className="py-6">
+              <div className="flex items-start gap-3">
+                <Target className={cn(
+                  'w-5 h-5 mt-0.5 flex-shrink-0',
+                  isLocked ? 'text-muted-foreground' : 'text-primary'
+                )} />
+                <div className="flex-1">
+                  <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-2">
+                    {isLocked ? 'Commitment was' : 'My commitment'}
+                  </p>
+                  <p className={cn(
+                    'font-mono text-lg',
+                    isLocked ? 'text-muted-foreground' : 'text-foreground'
+                  )}>
+                    "{task.commitment}"
+                  </p>
+                  {!isLocked && !isUpcoming && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      This cannot be edited. Execute or fail.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
           
           {/* Countdown */}
           {!isLocked && (
             <Card className={cn('mb-8 bg-card border-border', isActive && 'border-primary/50 glow-primary')}>
               <CardContent className="py-8 text-center">
                 <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-4">
-                  {isActive ? 'Time Remaining' : 'Deadline In'}
+                  {isActive ? 'Time Remaining' : 'Countdown to Execution'}
                 </p>
                 <CountdownTimer 
                   deadline={task.deadline} 
                   size="lg" 
                   onExpire={() => setRefreshKey(k => k + 1)}
                 />
+                {isActive && (
+                  <p className="text-xs text-muted-foreground font-mono mt-4">
+                    When this reaches zero, all work stops.
+                  </p>
+                )}
               </CardContent>
             </Card>
           )}
           
           {/* Group Link */}
-          {task.type === 'group' && task.groupLink && status === 'upcoming' && (
+          {task.type === 'group' && task.groupLink && isUpcoming && (
             <Card className="mb-8 bg-card border-border">
               <CardHeader>
                 <CardTitle className="font-mono text-sm flex items-center gap-2">
@@ -232,18 +314,21 @@ const TaskDetail = () => {
             </Card>
           )}
           
-          {/* Focus Session (Solo only) */}
-          {task.type === 'solo' && !isLocked && (
+          {/* Execution Window (Solo only) - Renamed from Focus Mode */}
+          {task.type === 'solo' && !isLocked && isActive && (
             <div className="mb-8">
               <div className="flex items-center gap-2 mb-4">
                 <Timer className="w-5 h-5 text-primary" />
-                <h2 className="font-mono text-lg font-semibold">Focus Mode</h2>
+                <h2 className="font-mono text-lg font-semibold">Execution Window</h2>
                 {totalFocusTime > 0 && (
                   <Badge variant="outline" className="font-mono text-xs ml-auto">
                     Total: {formatTotalTime(totalFocusTime)}
                   </Badge>
                 )}
               </div>
+              <p className="text-xs text-muted-foreground mb-4 font-mono">
+                Time-boxed execution. No distractions. Ship or fail.
+              </p>
               <div className="grid md:grid-cols-2 gap-6">
                 <FocusTimer 
                   onSessionComplete={handleFocusSessionComplete}
@@ -253,14 +338,57 @@ const TaskDetail = () => {
                   value={task.manualProgress || 0}
                   onChange={handleProgressChange}
                   disabled={isLocked}
+                  frozen={isLocked}
                 />
+              </div>
+            </div>
+          )}
+
+          {/* Frozen Progress for expired/completed */}
+          {task.type === 'solo' && isLocked && (task.manualProgress !== undefined && task.manualProgress > 0 || totalFocusTime > 0) && (
+            <div className="mb-8">
+              <div className="flex items-center gap-2 mb-4">
+                <Timer className="w-5 h-5 text-muted-foreground" />
+                <h2 className="font-mono text-lg font-semibold text-muted-foreground">Final State</h2>
+              </div>
+              <div className="grid md:grid-cols-2 gap-6">
+                {totalFocusTime > 0 && (
+                  <Card className="bg-card/50 border-border">
+                    <CardContent className="py-6 text-center">
+                      <p className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-2">
+                        Total Execution Time
+                      </p>
+                      <p className="font-mono text-3xl text-muted-foreground">
+                        {formatTotalTime(totalFocusTime)}
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+                {task.manualProgress !== undefined && task.manualProgress > 0 && (
+                  <Card className="bg-card/50 border-border">
+                    <CardContent className="py-6 text-center">
+                      <p className="font-mono text-xs text-muted-foreground uppercase tracking-wider mb-2">
+                        Final Progress
+                      </p>
+                      <p className="font-mono text-3xl text-muted-foreground">
+                        {task.manualProgress}%
+                      </p>
+                      <div className="h-2 bg-secondary rounded-full overflow-hidden mt-3 max-w-32 mx-auto">
+                        <div 
+                          className="h-full bg-muted-foreground"
+                          style={{ width: `${task.manualProgress}%` }}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
             </div>
           )}
           
           <div className="grid md:grid-cols-2 gap-6">
             {/* Subtasks */}
-            <Card className="bg-card border-border">
+            <Card className={cn('bg-card border-border', isLocked && 'opacity-75')}>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="font-mono text-sm">Subtasks</CardTitle>
@@ -280,18 +408,19 @@ const TaskDetail = () => {
                 )}
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleAddSubtask} className="flex gap-2 mb-4">
-                  <Input
-                    value={newSubtask}
-                    onChange={(e) => setNewSubtask(e.target.value)}
-                    placeholder="Add subtask..."
-                    className="bg-secondary border-border"
-                    disabled={isLocked}
-                  />
-                  <Button type="submit" size="icon" disabled={isLocked}>
-                    <Plus className="w-4 h-4" />
-                  </Button>
-                </form>
+                {!isLocked && (
+                  <form onSubmit={handleAddSubtask} className="flex gap-2 mb-4">
+                    <Input
+                      value={newSubtask}
+                      onChange={(e) => setNewSubtask(e.target.value)}
+                      placeholder="Add subtask..."
+                      className="bg-secondary border-border"
+                    />
+                    <Button type="submit" size="icon">
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </form>
+                )}
                 
                 <div className="space-y-2">
                   {task.subtasks?.map(subtask => (
@@ -315,7 +444,7 @@ const TaskDetail = () => {
                   
                   {(!task.subtasks || task.subtasks.length === 0) && (
                     <p className="text-sm text-muted-foreground text-center py-4">
-                      No subtasks yet
+                      {isLocked ? 'No subtasks were added' : 'No subtasks yet'}
                     </p>
                   )}
                 </div>
@@ -323,7 +452,7 @@ const TaskDetail = () => {
             </Card>
             
             {/* Updates */}
-            <Card className="bg-card border-border">
+            <Card className={cn('bg-card border-border', isLocked && 'opacity-75')}>
               <CardHeader>
                 <CardTitle className="font-mono text-sm">Progress Updates</CardTitle>
               </CardHeader>
@@ -358,7 +487,7 @@ const TaskDetail = () => {
                   
                   {(!task.updates || task.updates.length === 0) && (
                     <p className="text-sm text-muted-foreground text-center py-4">
-                      {isActive ? 'Post the first update!' : 'No updates yet'}
+                      {isActive ? 'Post the first update' : 'No updates were posted'}
                     </p>
                   )}
                 </div>
@@ -368,7 +497,7 @@ const TaskDetail = () => {
           
           {/* Members (Group only) */}
           {task.type === 'group' && task.members && (
-            <Card className="mt-6 bg-card border-border">
+            <Card className={cn('mt-6 bg-card border-border', isLocked && 'opacity-75')}>
               <CardHeader>
                 <CardTitle className="font-mono text-sm flex items-center gap-2">
                   <Users className="w-4 h-4" />
@@ -395,21 +524,23 @@ const TaskDetail = () => {
           )}
           
           {/* Actions */}
-          <div className="mt-8 flex gap-4 justify-center">
-            {isActive && (isCreator || task.type === 'solo') && (
-              <Button onClick={handleComplete} variant="success" size="lg" className="gap-2">
-                <CheckCircle2 className="w-5 h-5" />
-                Mark Complete
-              </Button>
-            )}
-            
-            {task.type === 'group' && isMember && !isCreator && status === 'upcoming' && (
-              <Button onClick={handleLeave} variant="outline" size="lg" className="gap-2">
-                <LogOut className="w-5 h-5" />
-                Leave Group
-              </Button>
-            )}
-          </div>
+          {!isLocked && (
+            <div className="mt-8 flex gap-4 justify-center">
+              {isActive && (isCreator || task.type === 'solo') && (
+                <Button onClick={handleComplete} variant="success" size="lg" className="gap-2">
+                  <CheckCircle2 className="w-5 h-5" />
+                  Mark Complete
+                </Button>
+              )}
+              
+              {task.type === 'group' && isMember && !isCreator && isUpcoming && (
+                <Button onClick={handleLeave} variant="outline" size="lg" className="gap-2">
+                  <LogOut className="w-5 h-5" />
+                  Leave Group
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       </main>
     </div>

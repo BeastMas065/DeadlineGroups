@@ -19,25 +19,25 @@ export const TaskCard = ({ task, onRefresh }: TaskCardProps) => {
   
   const statusConfig = {
     upcoming: {
-      label: 'UPCOMING',
+      label: 'LOCKED',
       variant: 'outline' as const,
       icon: Clock,
       cardClass: '',
     },
     active: {
-      label: 'ACTIVE',
+      label: 'EXECUTING',
       variant: 'default' as const,
       icon: Clock,
       cardClass: 'border-primary/50 glow-primary',
     },
     completed: {
-      label: 'COMPLETED',
+      label: 'DONE',
       variant: 'secondary' as const,
       icon: CheckCircle2,
       cardClass: 'opacity-75',
     },
     expired: {
-      label: 'EXPIRED',
+      label: 'ENDED',
       variant: 'secondary' as const,
       icon: XCircle,
       cardClass: 'task-card-expired',
@@ -89,9 +89,16 @@ export const TaskCard = ({ task, onRefresh }: TaskCardProps) => {
       </CardHeader>
       
       <CardContent>
-        <p className="text-muted-foreground text-sm line-clamp-2 mb-4">
-          {task.description}
-        </p>
+        {task.commitment && (
+          <p className="text-foreground text-sm font-mono mb-3 line-clamp-2">
+            "{task.commitment}"
+          </p>
+        )}
+        {task.description && (
+          <p className="text-muted-foreground text-xs line-clamp-1 mb-4">
+            {task.description}
+          </p>
+        )}
         
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4 text-xs text-muted-foreground font-mono">

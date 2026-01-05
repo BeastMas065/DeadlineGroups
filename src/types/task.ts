@@ -33,6 +33,7 @@ export interface Task {
   id: string;
   title: string;
   description: string;
+  commitment: string; // What will you deliver before this deadline?
   type: TaskType;
   status: TaskStatus;
   deadline: Date;
