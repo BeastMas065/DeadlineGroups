@@ -94,18 +94,18 @@ export const FocusTimer = ({ onSessionComplete, disabled = false }: FocusTimerPr
   return (
     <Card className={cn(
       'bg-card border-border transition-all duration-300',
-      isRunning && mode === 'focus' && 'border-primary/50 glow-primary'
+      isRunning && mode === 'focus' && 'border-primary glow-primary'
     )}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="font-mono text-sm flex items-center gap-2">
             <Timer className="w-4 h-4" />
-            Focus Session
+            Execution Block
           </CardTitle>
           {sessionsCompleted > 0 && (
             <Badge variant="secondary" className="font-mono text-xs">
               <CheckCircle2 className="w-3 h-3 mr-1" />
-              {sessionsCompleted} completed
+              {sessionsCompleted} done
             </Badge>
           )}
         </div>
@@ -121,7 +121,7 @@ export const FocusTimer = ({ onSessionComplete, disabled = false }: FocusTimerPr
             disabled={disabled || isRunning}
           >
             <Timer className="w-4 h-4" />
-            Focus
+            Execute
           </Button>
           <Button
             variant={mode === 'break' ? 'default' : 'outline'}
@@ -131,7 +131,7 @@ export const FocusTimer = ({ onSessionComplete, disabled = false }: FocusTimerPr
             disabled={disabled || isRunning}
           >
             <Coffee className="w-4 h-4" />
-            Break
+            Rest
           </Button>
         </div>
 
@@ -139,12 +139,12 @@ export const FocusTimer = ({ onSessionComplete, disabled = false }: FocusTimerPr
         <div className="text-center mb-6">
           <div className={cn(
             'font-mono text-5xl font-bold tracking-wider transition-colors',
-            mode === 'focus' ? 'text-primary' : 'text-muted-foreground'
+            mode === 'focus' && isRunning ? 'text-primary animate-pulse' : mode === 'focus' ? 'text-primary' : 'text-muted-foreground'
           )}>
             {formatTime(timeRemaining)}
           </div>
           <p className="text-xs text-muted-foreground font-mono mt-2 uppercase tracking-wider">
-            {mode === 'focus' ? 'Stay focused' : 'Take a break'}
+            {isRunning && mode === 'focus' ? 'Executing...' : mode === 'focus' ? 'Ready to execute' : 'Recovering'}
           </p>
         </div>
 
@@ -169,7 +169,7 @@ export const FocusTimer = ({ onSessionComplete, disabled = false }: FocusTimerPr
               className="gap-2 font-mono"
             >
               <Play className="w-5 h-5" />
-              Start
+              {mode === 'focus' ? 'Begin' : 'Start'}
             </Button>
           ) : (
             <Button

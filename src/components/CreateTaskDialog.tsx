@@ -18,6 +18,7 @@ export const CreateTaskDialog = ({ onTaskCreated }: CreateTaskDialogProps) => {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [commitment, setCommitment] = useState('');
   const [type, setType] = useState<TaskType>('solo');
   const [deadlineDate, setDeadlineDate] = useState('');
   const [deadlineTime, setDeadlineTime] = useState('');
@@ -25,7 +26,7 @@ export const CreateTaskDialog = ({ onTaskCreated }: CreateTaskDialogProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title.trim() || !deadlineDate || !deadlineTime) {
+    if (!title.trim() || !commitment.trim() || !deadlineDate || !deadlineTime) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -37,18 +38,15 @@ export const CreateTaskDialog = ({ onTaskCreated }: CreateTaskDialogProps) => {
       return;
     }
 
-    const task = createTask(title.trim(), description.trim(), type, deadline);
+    const task = createTask(title.trim(), description.trim(), commitment.trim(), type, deadline);
     
     onTaskCreated(task);
-    toast.success(
-      type === 'group' 
-        ? 'Group task created! Share the link to invite others.' 
-        : 'Task created! Stay focused.'
-    );
+    toast.success('Deadline created. Your contract with time begins.');
     
     // Reset form
     setTitle('');
     setDescription('');
+    setCommitment('');
     setType('solo');
     setDeadlineDate('');
     setDeadlineTime('');
@@ -88,16 +86,33 @@ export const CreateTaskDialog = ({ onTaskCreated }: CreateTaskDialogProps) => {
           </div>
           
           <div className="space-y-2">
+            <Label htmlFor="commitment" className="font-mono text-xs uppercase tracking-wider text-primary">
+              What will you deliver before this deadline? *
+            </Label>
+            <Input
+              id="commitment"
+              value={commitment}
+              onChange={(e) => setCommitment(e.target.value)}
+              placeholder="I will ship..."
+              className="bg-secondary border-border border-primary/30"
+              maxLength={200}
+            />
+            <p className="text-xs text-muted-foreground">
+              This is your contract. It cannot be edited after the deadline starts.
+            </p>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="description" className="font-mono text-xs uppercase tracking-wider">
-              Description
+              Description (optional)
             </Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="What needs to be done?"
+              placeholder="Additional context..."
               className="bg-secondary border-border resize-none"
-              rows={3}
+              rows={2}
               maxLength={500}
             />
           </div>

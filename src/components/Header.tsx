@@ -1,13 +1,13 @@
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Clock, History, Zap } from 'lucide-react';
+import { Clock, Archive, Zap } from 'lucide-react';
 
 export const Header = () => {
   const location = useLocation();
   
   const navItems = [
     { path: '/', label: 'Dashboard', icon: Zap },
-    { path: '/history', label: 'History', icon: History },
+    { path: '/history', label: 'Archive', icon: Archive },
   ];
 
   return (

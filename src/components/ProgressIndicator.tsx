@@ -9,9 +9,10 @@ interface ProgressIndicatorProps {
   value: number;
   onChange: (value: number) => void;
   disabled?: boolean;
+  frozen?: boolean;
 }
 
-export const ProgressIndicator = ({ value, onChange, disabled = false }: ProgressIndicatorProps) => {
+export const ProgressIndicator = ({ value, onChange, disabled = false, frozen = false }: ProgressIndicatorProps) => {
   const [localValue, setLocalValue] = useState(value);
 
   const handleChange = (newValue: number[]) => {
@@ -38,12 +39,12 @@ export const ProgressIndicator = ({ value, onChange, disabled = false }: Progres
   };
 
   return (
-    <Card className="bg-card border-border">
+    <Card className={cn('bg-card border-border', frozen && 'opacity-75')}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="font-mono text-sm flex items-center gap-2">
             <TrendingUp className="w-4 h-4" />
-            Manual Progress
+            {frozen ? 'Final Progress' : 'Honest Progress'}
           </CardTitle>
           <Badge 
             variant={localValue === 100 ? 'default' : 'secondary'} 
@@ -52,6 +53,11 @@ export const ProgressIndicator = ({ value, onChange, disabled = false }: Progres
             {localValue}%
           </Badge>
         </div>
+        {!frozen && (
+          <p className="text-xs text-muted-foreground font-mono">
+            Be honest. This is for you.
+          </p>
+        )}
       </CardHeader>
       <CardContent>
         {/* Visual Progress */}
